@@ -1,0 +1,37 @@
+name: bootstrap
+# Crea el esqueleto de Laravel + Filament una sola vez, cuando existe .ci/bootstrap
+on:
+  push:
+    branches: [main]
+    paths: ['.ci/bootstrap']
+permissions:
+  contents: write
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, zip, gd, pdo_sqlite, pdo_mysql, mbstring
+          tools: composer:v2
+      - name: Crear proyecto Laravel
+        run: |
+          composer create-project laravel/laravel:^12.0 /tmp/app --no-interaction --prefer-dist
+          cd /tmp/app
+          composer require filament/filament:"^3.3" -W --no-interaction
+          php artisan filament:install --panels --no-interaction || true
+          composer require spatie/laravel-sitemap --no-interaction
+      - name: Copiar al repositorio
+        run: |
+          rsync -a --exclude vendor --exclude node_modules --exclude .git --exclude .env /tmp/app/ ./
+          rm -f .ci/bootstrap
+          mkdir -p .ci && { echo "bootstrap OK $(date -u)"; php -v | head -1; cd /tmp/app && composer show --direct; } > .ci/bootstrap-report.txt
+      - name: Commit
+        run: |
+          git config user.name "localtur-ci"
+          git config user.email "ci@localtur.com"
+          git add -A
+          git commit -m "Esqueleto Laravel 12 + Filament 3 (generado por CI)" || echo "sin cambios"
+          git push
