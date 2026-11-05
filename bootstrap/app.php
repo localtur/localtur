@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Prototipo: nada se indexa mientras MARCA_INDEXAR=false
+        $middleware->append(\App\Http\Middleware\NoIndexar::class);
+        // Hostinger pasa por proxy: confiar en la cabecera de HTTPS
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

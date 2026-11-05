@@ -1,0 +1,7 @@
+﻿id_semilla;categoria;subtipo;titulo;region;comuna;localidad;direccion;estado;revisar
+T001;Alojar;Cabañas;Cabañas Lago Prueba;Los Lagos;Puerto Varas;Puerto Varas;Camino Ensenada km 3;sin_activar;
+T002;Alojar;Hostal;Hostal de Ejemplo;Los Lagos;Puerto Varas;Puerto Varas;Calle Falsa 123;sin_activar;posible duplicado
+T003;Comer;Restaurant;Fogón Ficticio;Los Lagos;Puerto Varas;Ensenada;;sin_activar;
+T004;Qué hacer;Turismo aventura;Kayak Inventado;Los Lagos;Puerto Varas;Puerto Varas;;sin_activar;
+T005;Alojar;Hotel;Hotel en Otra Comuna;Los Ríos;Panguipulli;Coñaripe;;sin_activar;
+T006;Desconocida;;Fila sin categoría válida;Los Lagos;Puerto Varas;;;sin_activar;

@@ -1,0 +1,10 @@
+# Hostinger: el repositorio se despliega en public_html/ y el sitio vive en public/.
+# Todo se reenvía a public/, así .env, vendor/ y storage/ nunca quedan expuestos.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

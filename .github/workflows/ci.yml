@@ -1,0 +1,94 @@
+name: CI
+
+# En cada push a main: instala dependencias, corre migraciones y pruebas,
+# deja un informe en la rama ci-report y, si todo pasa, publica la rama deploy
+# (código + vendor/) que Hostinger descarga con su despliegue por GIT.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-main
+  cancel-in-progress: true
+
+jobs:
+  probar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_sqlite, pdo_mysql, zip, gd
+          coverage: none
+
+      - name: Preparar
+        run: |
+          mkdir -p .ci-out
+          composer install --no-interaction --prefer-dist --no-progress 2>&1 | tail -20 > .ci-out/composer.txt
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
+
+      - name: Migrar e importar muestra
+        run: |
+          set -o pipefail
+          { php artisan migrate --force && \
+            php artisan localtur:importar-semilla tests/fixtures/semilla_publico.csv tests/fixtures/semilla_privado.csv && \
+            php artisan route:list --except-vendor; } 2>&1 | tee .ci-out/migrar.txt
+
+      - name: Pruebas
+        run: |
+          set -o pipefail
+          php artisan test 2>&1 | tee .ci-out/pruebas.txt
+
+      - name: Informe a la rama ci-report
+        if: always()
+        run: |
+          {
+            echo "commit: ${GITHUB_SHA}"
+            echo "fecha: $(date -u +%FT%TZ)"
+            echo "resultado: ${{ job.status }}"
+            for f in composer migrar pruebas; do echo; echo "===== $f ====="; cat .ci-out/$f.txt 2>/dev/null || echo "(no se generó)"; done
+            echo; echo "===== laravel.log (últimas 80 líneas) ====="; tail -80 storage/logs/laravel.log 2>/dev/null || echo "(vacío)"
+          } > /tmp/informe.txt
+          git config user.name "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          git fetch origin ci-report || true
+          git checkout --orphan informe-tmp
+          git rm -rq --cached . >/dev/null
+          cp /tmp/informe.txt informe.txt
+          git add -f informe.txt
+          git commit -qm "Informe CI ${GITHUB_SHA::7}: ${{ job.status }}"
+          git push -f origin informe-tmp:ci-report
+
+  publicar:
+    needs: probar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_mysql, zip, gd
+          coverage: none
+
+      - name: Dependencias de producción
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-progress
+
+      - name: Rama deploy con vendor/
+        run: |
+          git config user.name "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          sed -i '/^\/vendor$/d' .gitignore
+          git checkout -B deploy
+          git add -A
+          git add -f vendor
+          git commit -qm "Deploy ${GITHUB_SHA::7}"
+          git push -f origin deploy
