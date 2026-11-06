@@ -53,7 +53,7 @@ class SitioTest extends TestCase
         $this->get('/alojamiento/puerto-varas')->assertOk()->assertSee('Cabañas Lago Prueba')->assertDontSee('Kayak Inventado');
 
         $r = $this->get('/alojamiento/puerto-varas/cabanas-lago-prueba');
-        $r->assertOk()->assertSee('Cabañas Lago Prueba')->assertSee('application/ld+json', false)->assertSee('aún no ha sido activado');
+        $r->assertOk()->assertSee('Cabañas Lago Prueba')->assertSee('application/ld+json', false)->assertSee('aún no ha sido activado')->assertSee('Aquí podrían ir tus fotos', false);
         // Los datos privados nunca salen en la página pública
         $r->assertDontSee('11.111.111-1')->assertDontSee('+56652999999')->assertDontSee('Sociedad Inventada');
 

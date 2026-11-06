@@ -32,6 +32,14 @@ h1{font-size:clamp(26px,4vw,38px);line-height:1.15;letter-spacing:-.02em;margin:
 .cats{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.cats a{padding:6px 12px;border:1px solid var(--linea);border-radius:99px;text-decoration:none;color:var(--tinta);font-size:14px;background:var(--tarjeta)}
 footer{margin:48px 0 0;padding:24px 0;border-top:1px solid var(--linea);color:var(--suave);font-size:14px}
 nav.pag{margin:20px 0}nav.pag svg{width:16px}
+.media{position:relative;border-radius:var(--r);overflow:hidden;background:var(--linea);aspect-ratio:16/9}
+.media svg,.media img{display:block;width:100%;height:100%;object-fit:cover}
+.media .nota{position:absolute;left:10px;bottom:10px;font-size:12px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:99px}
+.galeria{display:grid;grid-template-columns:2fr 1fr 1fr;gap:6px;margin:18px 0 0}.galeria .media:first-child{grid-row:span 2;aspect-ratio:auto}
+.galeria.ilus{grid-template-columns:2fr 1fr}.galeria.ilus .media:first-child{grid-row:span 3}
+@media (max-width:640px){.galeria,.galeria.ilus{grid-template-columns:1fr 1fr 1fr}.galeria .media:first-child,.galeria.ilus .media:first-child{grid-column:span 3;grid-row:auto;aspect-ratio:16/9}}
+.sin-fotos{margin:8px 0 20px;font-size:14px;color:var(--suave);padding:10px 14px;border:1px dashed var(--linea);border-radius:var(--r)}
+.tarjeta.con-media{padding:0;overflow:hidden}.tarjeta.con-media .media{border-radius:0;aspect-ratio:16/10}.tarjeta.con-media .txt{padding:14px 16px}
 </style>
 </head>
 <body>

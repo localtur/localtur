@@ -34,6 +34,23 @@
 <h1>{{ $aviso->titulo }}</h1>
 <p style="color:var(--suave);margin-top:0">{{ $aviso->subtipo ?: $categoria['nombre'] }} · {{ $lugar }}, Región de {{ $loc->comuna->region->nombre }}</p>
 
+@php $fotos = array_slice(array_values(array_filter((array) $aviso->fotos)), 0, 10); @endphp
+@if (count($fotos))
+<div class="galeria">
+  @foreach (array_slice($fotos, 0, 5) as $i => $f)
+    <div class="media"><img src="{{ asset('storage/'.$f) }}" alt="{{ $aviso->titulo }}{{ $i ? ' · foto '.($i + 1) : '' }}" @if ($i) loading="lazy" @endif></div>
+  @endforeach
+</div>
+@else
+@php $variantes = collect(range(0, 11))->shuffle()->take(4); @endphp
+<div class="galeria ilus">
+  @foreach ($variantes as $v)
+    <div class="media">{!! \App\Support\Ilustracion::svg($aviso, '', $v) !!}</div>
+  @endforeach
+</div>
+<p class="sin-fotos">Ilustraciones referenciales. <strong>Aquí podrían ir tus fotos</strong>: si este es tu negocio, actívalo gratis y sube hasta 10.</p>
+@endif
+
 @if ($aviso->descripcion)
   <div>{!! nl2br(e($aviso->descripcion)) !!}</div>
 @else
@@ -47,7 +64,7 @@
 @unless ($aviso->activado)
 <div class="aviso-sin">
   <strong>Este aviso aún no ha sido activado por su dueño.</strong>
-  <p style="margin:6px 0 0">Los datos provienen de registros públicos y pueden estar desactualizados. ¿Es tu negocio? Actívalo gratis para agregar fotos, contacto directo y precios.</p>
+  <p style="margin:6px 0 0">Los datos provienen de registros públicos y pueden estar desactualizados. ¿Es tu negocio? Actívalo gratis para subir tus fotos, contacto directo y precios.</p>
 </div>
 @endunless
 
@@ -55,10 +72,13 @@
 <h2>Cerca, en {{ $loc->nombre }}</h2>
 <div class="grilla">
 @foreach ($cercanos as $c)
-  <a class="tarjeta" href="{{ route('aviso.ver', [$c->categoria_info['slug'], $loc->slug, $c->slug]) }}">
+  <a class="tarjeta con-media" href="{{ route('aviso.ver', [$c->categoria_info['slug'], $loc->slug, $c->slug]) }}">
+    @include('sitio._media', ['aviso' => $c])
+    <div class="txt">
     <span class="chip">{{ $c->categoria_info['nombre'] }}</span>
     <h3>{{ $c->titulo }}</h3>
     <p>{{ $c->subtipo }}</p>
+    </div>
   </a>
 @endforeach
 </div>

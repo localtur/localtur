@@ -19,10 +19,13 @@
 @else
 <div class="grilla">
 @foreach ($avisos as $a)
-  <a class="tarjeta" href="{{ route('aviso.ver', [$categoria['slug'], $localidad->slug, $a->slug]) }}">
+  <a class="tarjeta con-media" href="{{ route('aviso.ver', [$categoria['slug'], $localidad->slug, $a->slug]) }}">
+    @include('sitio._media', ['aviso' => $a])
+    <div class="txt">
     @if ($a->activado)<span class="chip">Verificado</span>@else<span class="chip gris">Sin activar</span>@endif
     <h3>{{ $a->titulo }}</h3>
     <p>{{ $a->subtipo }}</p>
+    </div>
   </a>
 @endforeach
 </div>
