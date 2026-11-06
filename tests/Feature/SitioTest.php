@@ -22,7 +22,7 @@ class SitioTest extends TestCase
     public function test_importa_la_semilla_y_omite_filas_invalidas(): void
     {
         $this->importar();
-        $this->assertSame(5, Aviso::count());
+        $this->assertSame(6, Aviso::count());
         $a = Aviso::where('titulo', 'Cabañas Lago Prueba')->firstOrFail();
         $this->assertSame('sin_activar', $a->estado);
         $this->assertSame('alojar', $a->categoria);
@@ -35,7 +35,7 @@ class SitioTest extends TestCase
         $this->importar();
         Aviso::where('titulo', 'Hostal de Ejemplo')->update(['estado' => 'completo', 'titulo' => 'Hostal Renovado']);
         $this->importar();
-        $this->assertSame(5, Aviso::count());
+        $this->assertSame(6, Aviso::count());
         $this->assertTrue(Aviso::where('titulo', 'Hostal Renovado')->exists());
     }
 
@@ -45,21 +45,43 @@ class SitioTest extends TestCase
         $this->assertSame(4, Aviso::count());
     }
 
-    public function test_paginas_publicas_y_noindex(): void
+    public function test_alojarse_muestra_regiones_menos_la_metropolitana(): void
     {
         $this->importar();
-        $this->get('/')->assertOk()->assertSee('Puerto Varas')->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+        $this->get('http://alojarse.cl/')->assertOk()->assertSee('Puerto Varas')->assertDontSee('Santiago Centro')
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
 
-        $this->get('/alojamiento/puerto-varas')->assertOk()->assertSee('Cabañas Lago Prueba')->assertDontSee('Kayak Inventado');
+        $this->get('http://alojarse.cl/alojamiento/puerto-varas')->assertOk()->assertSee('Cabañas Lago Prueba')->assertDontSee('Kayak Inventado');
 
-        $r = $this->get('/alojamiento/puerto-varas/cabanas-lago-prueba');
-        $r->assertOk()->assertSee('Cabañas Lago Prueba')->assertSee('application/ld+json', false)->assertSee('aún no ha sido activado')->assertSee('Aquí podrían ir tus fotos', false);
+        $r = $this->get('http://alojarse.cl/alojamiento/puerto-varas/cabanas-lago-prueba');
+        $r->assertOk()->assertSee('Cabañas Lago Prueba')->assertSee('application/ld+json', false)
+            ->assertSee('aún no ha sido activado')->assertSee('Aquí podrían ir tus fotos', false)
+            ->assertSee('<link rel="canonical" href="http://alojarse.cl/alojamiento/puerto-varas/cabanas-lago-prueba">', false);
         // Los datos privados nunca salen en la página pública
         $r->assertDontSee('11.111.111-1')->assertDontSee('+56652999999')->assertDontSee('Sociedad Inventada');
 
-        $this->get('/que-hacer/puerto-varas/kayak-inventado')->assertOk();
-        $this->get('/alojamiento/puerto-varas/no-existe')->assertNotFound();
-        $this->get('/categoria-falsa/puerto-varas')->assertNotFound();
+        $this->get('http://alojarse.cl/que-hacer/puerto-varas/kayak-inventado')->assertOk();
+        $this->get('http://alojarse.cl/alojamiento/puerto-varas/no-existe')->assertNotFound();
+        $this->get('http://alojarse.cl/categoria-falsa/puerto-varas')->assertNotFound();
+        // La Región Metropolitana no está en alojarse
+        $this->get('http://alojarse.cl/alojamiento/santiago')->assertNotFound();
+        $this->get('http://www.alojarse.cl/alojamiento/puerto-varas')->assertRedirect('https://alojarse.cl/alojamiento/puerto-varas');
+    }
+
+    public function test_localtur_por_pais_y_solo_metropolitana_en_chile(): void
+    {
+        $this->importar();
+        $this->get('/')->assertOk()->assertSee('Chile')->assertSee('Perú')->assertSee('Colombia');
+
+        $this->get('/cl')->assertOk()->assertSee('Santiago')->assertDontSee('Puerto Varas')
+            ->assertSee('alojarse.cl'); // enlace al resto de Chile
+        $this->get('/cl/alojamiento/santiago')->assertOk()->assertSee('Hostal Santiago Centro Prueba');
+        $this->get('/cl/alojamiento/santiago/hostal-santiago-centro-prueba')->assertOk();
+        $this->get('/cl/alojamiento/puerto-varas')->assertNotFound();
+
+        $this->get('/pe')->assertOk()->assertSee('Estamos llegando a Perú')->assertSee('Cusco');
+        $this->get('/co')->assertOk()->assertSee('Estamos llegando a Colombia')->assertSee('Cartagena');
+        $this->get('/ar')->assertNotFound();
     }
 
     public function test_robots_bloquea_todo_en_prototipo(): void

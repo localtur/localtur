@@ -9,23 +9,30 @@ return [
     // Mientras sea prototipo, ninguna página se indexa (cabecera X-Robots-Tag y robots.txt).
     'indexar' => (bool) env('MARCA_INDEXAR', false),
 
+    // hosts: dominios que sirven la marca. alias: redirigen 301 al dominio principal.
+    // dominio_prueba: donde se ve la marca mientras es prototipo (enlaces cruzados y "ver" del panel).
+    // regiones: qué regiones de cada país muestra la marca (solo / excluir, por slug de región).
+    // Chile se reparte: la Región Metropolitana en localtur.com/cl, todo el resto en alojarse.cl.
     'marcas' => [
         'localtur' => [
-            'nombre' => 'localtur',
+            'nombre' => 'LocalTur.com',
             'dominio' => 'localtur.com',
-            'hosts' => ['localtur.com', 'www.localtur.com'],
-            'eslogan' => 'Alojamiento y vida local, directo y sin comisiones',
-            'pais' => 'CL',
-            'moneda' => 'CLP',
+            'dominio_prueba' => 'staging.localtur.com',
+            'hosts' => ['localtur.com', 'staging.localtur.com'],
+            'alias' => ['www.localtur.com'],
+            'eslogan' => 'Alojamiento y vida local en América Latina, directo y sin comisiones',
+            'regiones' => ['cl' => ['solo' => ['metropolitana-de-santiago']]],
             'locale' => 'es_CL',
         ],
         'alojarse' => [
             'nombre' => 'alojarse.cl',
             'dominio' => 'alojarse.cl',
-            'hosts' => ['alojarse.cl', 'www.alojarse.cl'],
+            'dominio_prueba' => 'prueba-alojarse.localtur.com',
+            'pais_fijo' => 'cl',   // marca de un solo país: URLs sin carpeta de país
+            'hosts' => ['alojarse.cl', 'prueba-alojarse.localtur.com'],
+            'alias' => ['www.alojarse.cl'],
             'eslogan' => 'Encuentra dónde alojarte y qué hacer, directo y sin comisiones',
-            'pais' => 'CL',
-            'moneda' => 'CLP',
+            'regiones' => ['cl' => ['excluir' => ['metropolitana-de-santiago']]],
             'locale' => 'es_CL',
         ],
     ],

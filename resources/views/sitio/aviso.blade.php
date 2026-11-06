@@ -13,14 +13,14 @@
           'streetAddress' => $aviso->direccion,
           'addressLocality' => $loc->nombre,
           'addressRegion' => $loc->comuna->region->nombre,
-          'addressCountry' => $marca['pais'],
+          'addressCountry' => strtoupper($pais['codigo']),
       ]),
       'geo' => ($aviso->lat && ! $aviso->ubicacion_aproximada)
           ? ['@type' => 'GeoCoordinates', 'latitude' => (float) $aviso->lat, 'longitude' => (float) $aviso->lng]
           : null,
   ]);
 @endphp
-@extends('sitio.layout', ['titulo' => $titulo, 'descripcion' => $aviso->descripcion_corta, 'canonica' => $aviso->url])
+@extends('sitio.layout', ['titulo' => $titulo, 'descripcion' => $aviso->descripcion_corta])
 
 @push('jsonld')
 <script type="application/ld+json">{!! json_encode($jsonld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
@@ -28,11 +28,11 @@
 
 @section('contenido')
 <div class="miga">
-  <a href="{{ route('inicio') }}">Inicio</a> ›
-  <a href="{{ route('listado', [$categoria['slug'], $loc->slug]) }}">{{ $categoria['nombre'] }} en {{ $loc->nombre }}</a>
+  <a href="{{ \App\Support\Pais::ruta('inicio') }}">Inicio</a> ›
+  <a href="{{ \App\Support\Pais::ruta('listado', [$categoria['slug'], $loc->slug]) }}">{{ $categoria['nombre'] }} en {{ $loc->nombre }}</a>
 </div>
 <h1>{{ $aviso->titulo }}</h1>
-<p style="color:var(--suave);margin-top:0">{{ $aviso->subtipo ?: $categoria['nombre'] }} · {{ $lugar }}, Región de {{ $loc->comuna->region->nombre }}</p>
+<p style="color:var(--suave);margin-top:0">{{ $aviso->subtipo ?: $categoria['nombre'] }} · {{ $lugar }}, {{ $pais['division']['region'] }} {{ str_starts_with($loc->comuna->region->nombre, 'Metropolitana') ? '' : 'de ' }}{{ $loc->comuna->region->nombre }}</p>
 
 @php $fotos = array_slice(array_values(array_filter((array) $aviso->fotos)), 0, 10); @endphp
 @if (count($fotos))
@@ -78,7 +78,7 @@
 <h2>Cerca, en {{ $loc->nombre }}</h2>
 <div class="grilla">
 @foreach ($cercanos as $c)
-  <a class="tarjeta con-media" href="{{ route('aviso.ver', [$c->categoria_info['slug'], $loc->slug, $c->slug]) }}">
+  <a class="tarjeta con-media" href="{{ \App\Support\Pais::ruta('aviso.ver', [$c->categoria_info['slug'], $loc->slug, $c->slug]) }}">
     @include('sitio._media', ['aviso' => $c])
     <div class="txt">
     <span class="chip">{{ $c->categoria_info['nombre'] }}</span>

@@ -12,6 +12,9 @@ class NoIndexar
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Cada petición elige de nuevo marca y país (importa en procesos largos y en pruebas)
+        Marca::reiniciar();
+        \App\Support\Pais::reiniciar();
         $respuesta = $next($request);
         if (! Marca::indexar()) {
             $respuesta->headers->set('X-Robots-Tag', 'noindex, nofollow');

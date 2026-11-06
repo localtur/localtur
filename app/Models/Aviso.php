@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\Marca;
+use App\Support\Pais as PaisSitio;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -65,9 +66,12 @@ class Aviso extends Model
         return in_array($this->estado, ['activo_gratis', 'completo', 'anual'], true);
     }
 
-    /** /alojamiento/puerto-varas/cabana-mirador-del-lago — misma forma que alojarse.cl */
+    /** alojarse.cl/alojamiento/puerto-varas/x  ·  localtur.com/cl/alojamiento/puerto-varas/x */
     public function getUrlAttribute(): string
     {
-        return route('aviso.ver', [$this->categoria_info['slug'], $this->localidad->slug, $this->slug]);
+        $region = $this->localidad->comuna->region;
+        $pais = strtolower($region->pais->codigo ?? 'cl');
+
+        return PaisSitio::rutaParaRegion('aviso.ver', [$this->categoria_info['slug'], $this->localidad->slug, $this->slug], $pais, $region->slug);
     }
 }
