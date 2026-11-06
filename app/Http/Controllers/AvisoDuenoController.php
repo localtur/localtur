@@ -46,10 +46,11 @@ class AvisoDuenoController extends Controller
             'acepto' => ['accepted'],
         ], ['acepto.accepted' => 'Debes confirmar que estás autorizado a administrar este negocio.']);
 
-        Reclamo::updateOrCreate(
+        $reclamo = Reclamo::updateOrCreate(
             ['aviso_id' => $aviso->id, 'user_id' => $request->user()->id],
             ['relacion' => $datos['relacion'], 'telefono' => $datos['telefono'], 'mensaje' => $datos['mensaje'] ?? null, 'estado' => 'pendiente']
         );
+        $reclamo->avisarAlEquipo();
 
         return redirect()->route('cuenta.inicio')->with('ok', 'Recibimos tu solicitud. Te avisaremos cuando la revisemos (normalmente en 1 a 2 días hábiles).');
     }

@@ -9,6 +9,7 @@
   <input type="password" id="password" name="password" required autocomplete="current-password">
   <label class="check"><input type="checkbox" name="recordar" value="1"> Mantener la sesión abierta</label>
   <p style="margin-top:20px"><button class="btn" type="submit">Ingresar</button></p>
+  <p><a href="{{ route('password.request') }}">¿Olvidaste tu contraseña?</a></p>
   <p>¿No tienes cuenta? <a href="{{ route('registro') }}">Crea una gratis</a></p>
 </form>
 @endsection

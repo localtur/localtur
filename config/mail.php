@@ -115,4 +115,8 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+
+    // Correo del equipo: recibe los avisos de solicitudes "¿Es tu negocio?"
+    'equipo' => env('MAIL_EQUIPO'),
+
 ];

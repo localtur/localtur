@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AvisoDuenoController;
+use App\Http\Controllers\ClaveController;
 use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\SitioController;
 use App\Http\Middleware\ResolverPais;
@@ -16,6 +17,10 @@ Route::middleware(ResolverPais::class)->group(function () {
         Route::post('/ingresar', [CuentaController::class, 'ingresar'])->name('ingresar');
         Route::get('/registro', [CuentaController::class, 'formRegistro'])->name('registro');
         Route::post('/registro', [CuentaController::class, 'registrar'])->name('registrar');
+        Route::get('/olvide-mi-clave', [ClaveController::class, 'formOlvide'])->name('password.request');
+        Route::post('/olvide-mi-clave', [ClaveController::class, 'enviarEnlace'])->middleware('throttle:5,1')->name('password.email');
+        Route::get('/nueva-clave/{token}', [ClaveController::class, 'formRestablecer'])->name('password.reset');
+        Route::post('/nueva-clave', [ClaveController::class, 'restablecer'])->name('password.update');
     });
     Route::middleware('auth')->prefix('cuenta')->name('cuenta.')->group(function () {
         Route::get('/', [CuentaController::class, 'inicio'])->name('inicio');

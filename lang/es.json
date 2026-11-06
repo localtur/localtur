@@ -1,0 +1,12 @@
+{
+    "Hello!": "¡Hola!",
+    "Whoops!": "¡Ups!",
+    "Regards,": "Saludos,",
+    "All rights reserved.": "Todos los derechos reservados.",
+    "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\ninto your web browser:": "Si el botón «:actionText» no funciona, copia y pega este enlace en tu navegador:",
+    "passwords.reset": "Tu contraseña fue cambiada.",
+    "passwords.sent": "Si el correo está registrado, te enviamos un enlace para cambiar la contraseña.",
+    "passwords.throttled": "Espera un momento antes de volver a intentarlo.",
+    "passwords.token": "El enlace para cambiar la contraseña no es válido o ya venció.",
+    "passwords.user": "Si el correo está registrado, te enviamos un enlace para cambiar la contraseña."
+}

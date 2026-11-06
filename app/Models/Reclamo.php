@@ -41,10 +41,35 @@ class Reclamo extends Model
             static::where('aviso_id', $this->aviso_id)->where('id', '!=', $this->id)->where('estado', 'pendiente')
                 ->update(['estado' => 'rechazado', 'motivo_rechazo' => 'Otra persona acreditó ser responsable del aviso', 'revisado_por' => $revisor->id, 'revisado_en' => now()]);
         });
+        $this->avisar();
+    }
+
+    /** Correo al solicitante. Si el correo falla, la aprobación igual queda hecha. */
+    public function avisar(): void
+    {
+        try {
+            $this->usuario->notify(new \App\Notifications\ReclamoResuelto($this));
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /** Correo al equipo cuando llega una solicitud nueva. */
+    public function avisarAlEquipo(): void
+    {
+        if (! ($correo = config('mail.equipo'))) {
+            return;
+        }
+        try {
+            \Illuminate\Support\Facades\Notification::route('mail', $correo)->notify(new \App\Notifications\ReclamoRecibido($this));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     public function rechazar(User $revisor, ?string $motivo = null): void
     {
         $this->update(['estado' => 'rechazado', 'motivo_rechazo' => $motivo, 'revisado_por' => $revisor->id, 'revisado_en' => now()]);
+        $this->avisar();
     }
 }
