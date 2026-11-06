@@ -34,6 +34,7 @@ footer{margin:48px 0 0;padding:24px 0;border-top:1px solid var(--linea);color:va
 nav.pag{margin:20px 0}nav.pag svg{width:16px}
 .media{position:relative;border-radius:var(--r);overflow:hidden;background:var(--linea);aspect-ratio:16/9}
 .media svg,.media img{display:block;width:100%;height:100%;object-fit:cover}
+.media.ref{background:#fff}.media.ref img{object-fit:contain}
 .media .nota{position:absolute;left:10px;bottom:10px;font-size:12px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:99px}
 .galeria{display:grid;grid-template-columns:2fr 1fr 1fr;gap:6px;margin:18px 0 0}.galeria .media:first-child{grid-row:span 2;aspect-ratio:auto}
 .galeria.ilus{grid-template-columns:2fr 1fr}.galeria.ilus .media:first-child{grid-row:span 3}

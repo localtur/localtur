@@ -25,6 +25,34 @@ class Ilustracion
         'austral' => ['lejos' => '#b8c4d2', 'medio' => '#5d7184', 'suelo' => '#8d9a6c', 'agua' => '#6fa8c0'],
     ];
 
+    /**
+     * Imágenes referenciales (webp) en public/img/referenciales/. Si existe una subcarpeta con la clave de
+     * la categoría (alojar, comer, hacer, comercio, servicios), se usan esas; si no, las generales.
+     * Para agregar más basta con dejar archivos en la carpeta.
+     *
+     * @return array<int, string> URLs públicas
+     */
+    public static function imagenes(string $categoria): array
+    {
+        static $cache = [];
+        if (! isset($cache[$categoria])) {
+            $base = public_path('img/referenciales');
+            $lista = glob("$base/$categoria/*.webp") ?: glob("$base/*.webp") ?: [];
+            sort($lista);
+            $cache[$categoria] = array_map(fn ($f) => asset('img/referenciales/'.ltrim(substr($f, strlen($base)), '/')), $lista);
+        }
+
+        return $cache[$categoria];
+    }
+
+    /** Una imagen fija por aviso (para tarjetas), o null si no hay imágenes cargadas. */
+    public static function imagenDe(Aviso $a, int $desfase = 0): ?string
+    {
+        $l = self::imagenes($a->categoria);
+
+        return $l ? $l[(crc32($a->slug.'|'.$a->id) + $desfase) % count($l)] : null;
+    }
+
     public static function zona(Aviso $a): string
     {
         $z = $a->imagen_referencial ? substr($a->imagen_referencial, strrpos($a->imagen_referencial, '-') + 1) : '';

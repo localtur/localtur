@@ -42,8 +42,14 @@
   @endforeach
 </div>
 @else
-@php $variantes = collect(range(0, 11))->shuffle()->take(4); @endphp
+@php
+  $refs = collect(\App\Support\Ilustracion::imagenes($aviso->categoria))->shuffle()->take(4);
+  $variantes = $refs->isEmpty() ? collect(range(0, 11))->shuffle()->take(4) : collect();
+@endphp
 <div class="galeria ilus">
+  @foreach ($refs as $i => $url)
+    <div class="media ref"><img src="{{ $url }}" alt="Ilustración referencial" @if ($i) loading="lazy" @endif></div>
+  @endforeach
   @foreach ($variantes as $v)
     <div class="media">{!! \App\Support\Ilustracion::svg($aviso, '', $v) !!}</div>
   @endforeach
