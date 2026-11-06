@@ -71,7 +71,7 @@ class SitioTest extends TestCase
     public function test_localtur_por_pais_y_solo_metropolitana_en_chile(): void
     {
         $this->importar();
-        $this->get('/')->assertOk()->assertSee('Chile')->assertSee('Perú')->assertSee('Colombia');
+        $this->get('/')->assertOk()->assertSee('Chile')->assertSee('Perú')->assertSee('Colombia')->assertSee('México');
 
         $this->get('/cl')->assertOk()->assertSee('Santiago')->assertDontSee('Puerto Varas')
             ->assertSee('alojarse.cl'); // enlace al resto de Chile
@@ -81,6 +81,7 @@ class SitioTest extends TestCase
 
         $this->get('/pe')->assertOk()->assertSee('Estamos llegando a Perú')->assertSee('Cusco');
         $this->get('/co')->assertOk()->assertSee('Estamos llegando a Colombia')->assertSee('Cartagena');
+        $this->get('/mx')->assertOk()->assertSee('Estamos llegando a México')->assertSee('Oaxaca');
         $this->get('/ar')->assertNotFound();
     }
 

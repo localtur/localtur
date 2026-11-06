@@ -7,6 +7,9 @@
 //   Chile:    Región → Comuna → Localidad
 //   Perú:     Departamento → Distrito → Localidad   (la provincia queda como dato de la localidad)
 //   Colombia: Departamento → Municipio → Localidad / vereda
+//   México:   Estado → Municipio → Localidad
+//
+// Medios de pago: solo Mercado Pago y PayPal en todos los países (por ahora).
 
 return [
     'cl' => [
@@ -22,8 +25,9 @@ return [
             'franja' => 'linear-gradient(90deg,#fff 0 50%,#d52b1e 50%)'],
         'bandera' => 'cl',
         'eslogan' => 'Alojamiento y vida local en Chile, directo y sin comisiones',
-        'destinos' => ['Puerto Varas', 'Pucón', 'San Pedro de Atacama', 'Valparaíso', 'Puerto Natales', 'Chiloé'],
-        'pagos' => ['Mercado Pago', 'Flow', 'Transferencia bancaria'],
+        // En localtur, Chile es solo la Región Metropolitana (el resto está en alojarse.cl)
+        'destinos' => ['Santiago', 'Cajón del Maipo', 'Farellones', 'Pirque', 'Isla de Maipo', 'Talagante'],
+        'pagos' => ['Mercado Pago', 'PayPal'],
     ],
     'pe' => [
         'nombre' => 'Perú',
@@ -39,7 +43,7 @@ return [
         'bandera' => 'pe',
         'eslogan' => 'Alojamiento y vida local en Perú, directo y sin comisiones',
         'destinos' => ['Cusco', 'Valle Sagrado', 'Arequipa', 'Lima', 'Paracas', 'Máncora'],
-        'pagos' => ['Mercado Pago', 'Yape / Plin', 'Transferencia bancaria'],
+        'pagos' => ['Mercado Pago', 'PayPal'],
     ],
     'co' => [
         'nombre' => 'Colombia',
@@ -55,6 +59,22 @@ return [
         'bandera' => 'co',
         'eslogan' => 'Alojamiento y vida local en Colombia, directo y sin comisiones',
         'destinos' => ['Cartagena', 'Medellín', 'Eje Cafetero', 'Santa Marta', 'Bogotá', 'San Andrés'],
-        'pagos' => ['Mercado Pago', 'PSE', 'Nequi', 'Transferencia bancaria'],
+        'pagos' => ['Mercado Pago', 'PayPal'],
+    ],
+    'mx' => [
+        'nombre' => 'México',
+        'activo' => false,
+        'locale' => 'es_MX',
+        'hreflang' => 'es-MX',
+        'moneda' => 'MXN',
+        'prefijo' => '+52',
+        'id_fiscal' => 'RFC',
+        'division' => ['region' => 'Estado', 'comuna' => 'Municipio', 'localidad' => 'Localidad'],
+        'colores' => ['principal' => '#006847', 'secundario' => '#ce1126', 'suave' => '#e6f2ec', 'tinta_hero' => '#ffffff', 'hero' => '#006847', 'hero_2' => '#004d35',
+            'franja' => 'linear-gradient(90deg,#006847 0 33.3%,#fff 33.3% 66.6%,#ce1126 66.6%)'],
+        'bandera' => 'mx',
+        'eslogan' => 'Alojamiento y vida local en México, directo y sin comisiones',
+        'destinos' => ['Ciudad de México', 'Oaxaca', 'Riviera Maya', 'San Miguel de Allende', 'Mérida', 'Puerto Vallarta'],
+        'pagos' => ['Mercado Pago', 'PayPal'],
     ],
 ];

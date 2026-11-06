@@ -1,7 +1,7 @@
 @extends('sitio.layout', ['titulo' => 'LocalTur.com · '.$marca['eslogan'], 'descripcion' => $marca['eslogan']])
 
 @section('contenido')
-<section class="hero" style="--hero:#0f6b5c;--hero-2:#0b5247;--hero-tinta:#fff;--franja:linear-gradient(90deg,#0039a6 0 33.3%,#d91023 33.3% 66.6%,#fcd116 66.6%)">
+<section class="hero" style="--hero:#0f6b5c;--hero-2:#0b5247;--hero-tinta:#fff;--franja:linear-gradient(90deg,#0039a6 0 25%,#d91023 25% 50%,#fcd116 50% 75%,#006847 75%)">
   <h1>{{ $marca['eslogan'] }}</h1>
   <p>Elige tu destino. Cada país con sus alojamientos, su comida, sus actividades y su gente.</p>
   @include('sitio._pin', ['bandera' => 'latam', 'alto' => 120])

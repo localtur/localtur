@@ -14,6 +14,10 @@
     @case('co')
       <rect width="40" height="52" fill="#ce1126"/><rect width="40" height="38" fill="#003893"/><rect width="40" height="25" fill="#fcd116"/>
       @break
+    @case('mx')
+      <rect width="40" height="52" fill="#ce1126"/><rect width="26.7" height="52" fill="#fff"/><rect width="13.3" height="52" fill="#006847"/>
+      <circle cx="20" cy="20" r="3.6" fill="#8c6a2f"/><path d="M16.6 22.6q3.4 2.6 6.8 0" stroke="#4f7a3a" stroke-width="1.2" fill="none"/>
+      @break
     @default
       <rect width="40" height="52" fill="#0f6b5c"/><circle cx="20" cy="20" r="7" fill="#fff"/>
   @endswitch
