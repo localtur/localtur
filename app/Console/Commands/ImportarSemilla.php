@@ -22,8 +22,8 @@ use Illuminate\Support\Str;
 class ImportarSemilla extends Command
 {
     protected $signature = 'localtur:importar-semilla
-        {publico : Ruta al CSV público}
-        {privado? : Ruta al CSV privado}
+        {publico=storage/app/private/semilla_avisos_publico.csv : Ruta al CSV público}
+        {privado=storage/app/private/semilla_avisos_privado.csv : Ruta al CSV privado}
         {--comuna= : Importar solo esta comuna (por nombre, ej. "Puerto Varas")}
         {--simular : Mostrar qué haría sin guardar nada}';
 
