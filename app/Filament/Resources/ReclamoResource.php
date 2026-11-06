@@ -40,13 +40,13 @@ class ReclamoResource extends Resource
                     ->description(fn (Reclamo $r) => $r->aviso?->localidad?->nombre),
                 Tables\Columns\TextColumn::make('usuario.name')->label('Solicitante')->searchable()
                     ->description(fn (Reclamo $r) => $r->usuario?->email),
-                Tables\Columns\TextColumn::make('relacion')->label('Relación')->formatStateUsing(fn ($s) => Reclamo::RELACIONES[$s] ?? $s),
+                Tables\Columns\TextColumn::make('relacion')->label('Relación')->formatStateUsing(fn ($state) => Reclamo::RELACIONES[$state] ?? $state),
                 Tables\Columns\TextColumn::make('telefono')->label('Tel. declarado')
                     ->description(fn (Reclamo $r) => 'Registro: '.($r->aviso?->privado?->telefono ?: '—')),
                 Tables\Columns\TextColumn::make('mensaje')->limit(50)->toggleable(),
                 Tables\Columns\TextColumn::make('estado')->badge()
-                    ->formatStateUsing(fn ($s) => Reclamo::ESTADOS[$s] ?? $s)
-                    ->color(fn ($s) => ['pendiente' => 'warning', 'aprobado' => 'success', 'rechazado' => 'danger'][$s] ?? 'gray'),
+                    ->formatStateUsing(fn ($state) => Reclamo::ESTADOS[$state] ?? $state)
+                    ->color(fn ($state) => ['pendiente' => 'warning', 'aprobado' => 'success', 'rechazado' => 'danger'][$state] ?? 'gray'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('estado')->options(Reclamo::ESTADOS)->default('pendiente'),
