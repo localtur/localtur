@@ -1,11 +1,33 @@
 <?php
 
+use App\Http\Controllers\AvisoDuenoController;
+use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\SitioController;
 use App\Http\Middleware\ResolverPais;
 use App\Support\Pais;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/robots.txt', [SitioController::class, 'robots']);
+
+// Cuentas: mismas rutas en todas las marcas (alojarse.cl/cuenta, localtur.com/cuenta)
+Route::middleware(ResolverPais::class)->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::get('/ingresar', [CuentaController::class, 'formIngreso'])->name('login');
+        Route::post('/ingresar', [CuentaController::class, 'ingresar'])->name('ingresar');
+        Route::get('/registro', [CuentaController::class, 'formRegistro'])->name('registro');
+        Route::post('/registro', [CuentaController::class, 'registrar'])->name('registrar');
+    });
+    Route::middleware('auth')->prefix('cuenta')->name('cuenta.')->group(function () {
+        Route::get('/', [CuentaController::class, 'inicio'])->name('inicio');
+        Route::post('/salir', [CuentaController::class, 'salir'])->name('salir');
+        Route::get('/reclamar/{aviso}', [AvisoDuenoController::class, 'formReclamar'])->name('reclamar');
+        Route::post('/reclamar/{aviso}', [AvisoDuenoController::class, 'reclamar'])->name('reclamar.enviar');
+        Route::get('/avisos/nuevo', [AvisoDuenoController::class, 'formNuevo'])->name('aviso.nuevo');
+        Route::post('/avisos', [AvisoDuenoController::class, 'crear'])->name('aviso.crear');
+        Route::get('/avisos/{aviso}/editar', [AvisoDuenoController::class, 'formEditar'])->name('aviso.editar');
+        Route::put('/avisos/{aviso}', [AvisoDuenoController::class, 'actualizar'])->name('aviso.actualizar');
+    });
+});
 
 $categorias = implode('|', array_column(config('marca.categorias'), 'slug'));
 

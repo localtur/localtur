@@ -31,6 +31,19 @@ header.sup{border-bottom:1px solid var(--linea);background:var(--tarjeta)}header
 @media (max-width:640px){.hero{padding:28px 20px 36px}.hero .pin{display:none}}
 .hero h1{margin:0 0 8px}.hero p{margin:0;max-width:640px;opacity:.92}.hero .pin{position:absolute;right:36px;top:50%;transform:translateY(-50%);filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
 .chips{display:flex;flex-wrap:wrap;gap:8px}.chips span{padding:6px 12px;border-radius:99px;background:var(--marca-2);color:var(--marca);font-size:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;border:1px solid var(--marca);background:var(--marca);color:#fff;font:600 15px/1.2 inherit;text-decoration:none;cursor:pointer}
+.btn.sec{background:transparent;color:var(--marca)}.btn.chico{padding:6px 12px;font-size:14px}
+.cuenta-link{font-size:14px;font-weight:600;color:var(--tinta);text-decoration:none}
+.form{max-width:560px}.form.ancho{max-width:820px}.form label{display:block;font-weight:600;font-size:14px;margin:16px 0 6px}
+.form input[type=text],.form input[type=email],.form input[type=password],.form input[type=tel],.form input[type=url],.form select,.form textarea{width:100%;padding:10px 12px;border:1px solid var(--linea);border-radius:10px;background:var(--tarjeta);color:var(--tinta);font:15px/1.4 inherit}
+.form textarea{min-height:120px}.form .ayuda{font-size:13px;color:var(--suave);margin-top:4px}.form .check{display:flex;gap:8px;align-items:flex-start;font-weight:400}
+.form .dos{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media (max-width:640px){.form .dos{grid-template-columns:1fr}}
+.alerta{padding:12px 14px;border-radius:var(--r);margin:16px 0;font-size:15px}.alerta.ok{background:#e7f6ec;color:#185c33}.alerta.error{background:#fdecec;color:#8a1c1c}
+.alerta ul{margin:0;padding-left:18px}
+.fotos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.fotos-grid figure{margin:0;border:1px solid var(--linea);border-radius:10px;overflow:hidden;background:var(--tarjeta)}
+.fotos-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}.fotos-grid figcaption{padding:6px 8px;font-size:13px;display:flex;flex-direction:column;gap:2px}
+.contacto{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.estado{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--linea)}
 .cruce{margin:22px 0;padding:14px 16px;border-radius:var(--r);border:1px solid var(--linea);background:var(--tarjeta)}
 .proto{font-size:12px;background:var(--acento);color:#fff;padding:3px 8px;border-radius:99px}
 h1{font-size:clamp(26px,4vw,38px);line-height:1.15;letter-spacing:-.02em;margin:28px 0 8px}h2{font-size:20px;margin:28px 0 12px}
@@ -66,10 +79,17 @@ nav.pag{margin:20px 0}nav.pag svg{width:16px}
       @endforeach
     </nav>
     @endif
+    @auth
+      <a class="cuenta-link" href="{{ route('cuenta.inicio') }}">Mi cuenta</a>
+    @else
+      <a class="cuenta-link" href="{{ route('login') }}">Ingresar</a>
+    @endauth
     @unless (\App\Support\Marca::indexar())<span class="proto">Prototipo</span>@endunless
   </div>
 </div></header>
 <main class="env">
+@if (session('ok'))<div class="alerta ok">{{ session('ok') }}</div>@endif
+@if ($errors->any())<div class="alerta error"><ul>@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
 @yield('contenido')
 </main>
 <footer><div class="env">{{ $marca['nombre'] }}{{ isset($pais) && \App\Support\Pais::multipais() ? ' '.$pais['nombre'] : '' }} · {{ $pais['eslogan'] ?? $marca['eslogan'] }}</div></footer>

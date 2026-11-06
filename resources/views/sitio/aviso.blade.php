@@ -8,6 +8,7 @@
       'name' => $aviso->titulo,
       'description' => $aviso->descripcion_corta,
       'url' => $aviso->url,
+      'telephone' => $aviso->activado ? ($aviso->contacto_telefono ?: $aviso->contacto_whatsapp) : null,
       'address' => array_filter([
           '@type' => 'PostalAddress',
           'streetAddress' => $aviso->direccion,
@@ -54,7 +55,11 @@
     <div class="media">{!! \App\Support\Ilustracion::svg($aviso, '', $v) !!}</div>
   @endforeach
 </div>
-<p class="sin-fotos">Ilustraciones referenciales. <strong>Aquí podrían ir tus fotos</strong>: si este es tu negocio, actívalo gratis y sube hasta 10.</p>
+@if ($aviso->activado)
+<p class="sin-fotos">Ilustraciones referenciales: este negocio aún no ha subido fotos.</p>
+@else
+<p class="sin-fotos">Ilustraciones referenciales. <strong>Aquí podrían ir tus fotos</strong>: si este es tu negocio, <a href="{{ route('cuenta.reclamar', $aviso) }}" rel="nofollow">actívalo gratis</a> y sube hasta 10.</p>
+@endif
 @endif
 
 @if ($aviso->descripcion)
@@ -67,12 +72,25 @@
   <p><strong>Dirección:</strong> {{ $aviso->direccion }}@if ($aviso->ubicacion_aproximada) <span style="color:var(--suave)">(ubicación aproximada)</span>@endif</p>
 @endif
 
-@unless ($aviso->activado)
+@if ($aviso->activado)
+  @php $wa = preg_replace('/\D+/', '', (string) $aviso->contacto_whatsapp); @endphp
+  @if ($wa || $aviso->contacto_telefono || $aviso->contacto_correo || $aviso->contacto_web)
+  <h2>Contacto directo</h2>
+  <div class="contacto">
+    @if ($wa)<a class="btn" href="https://wa.me/{{ $wa }}?text={{ rawurlencode('Hola, vi su aviso "'.$aviso->titulo.'" en '.$marca['nombre']) }}" rel="nofollow">WhatsApp</a>@endif
+    @if ($aviso->contacto_telefono)<a class="btn sec" href="tel:{{ preg_replace('/[^\d+]/', '', $aviso->contacto_telefono) }}" rel="nofollow">Llamar</a>@endif
+    @if ($aviso->contacto_correo)<a class="btn sec" href="mailto:{{ $aviso->contacto_correo }}" rel="nofollow">Correo</a>@endif
+    @if ($aviso->contacto_web)<a class="btn sec" href="{{ $aviso->contacto_web }}" rel="nofollow noopener" target="_blank">Web / reservas</a>@endif
+  </div>
+  <p class="ayuda" style="font-size:13px;color:var(--suave)">El trato es directo con {{ $aviso->titulo }}. {{ $marca['nombre'] }} no cobra comisiones ni intermedia en el pago.</p>
+  @endif
+@else
 <div class="aviso-sin">
   <strong>Este aviso aún no ha sido activado por su dueño.</strong>
-  <p style="margin:6px 0 0">Los datos provienen de registros públicos y pueden estar desactualizados. ¿Es tu negocio? Actívalo gratis para subir tus fotos, contacto directo y precios.</p>
+  <p style="margin:6px 0 12px">Los datos provienen de registros públicos y pueden estar desactualizados. ¿Es tu negocio? Actívalo gratis para subir tus fotos, contacto directo y precios.</p>
+  <a class="btn" href="{{ route('cuenta.reclamar', $aviso) }}" rel="nofollow">¿Es tu negocio? Actívalo gratis</a>
 </div>
-@endunless
+@endif
 
 @if ($cercanos->isNotEmpty())
 <h2>Cerca, en {{ $loc->nombre }}</h2>

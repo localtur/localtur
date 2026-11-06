@@ -7,6 +7,7 @@ use App\Support\Pais as PaisSitio;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Aviso extends Model
@@ -26,7 +27,10 @@ class Aviso extends Model
         'localidad_id', 'user_id', 'categoria', 'subtipo', 'titulo', 'slug', 'descripcion_corta', 'descripcion',
         'direccion', 'lat', 'lng', 'ubicacion_aproximada', 'estado', 'tramo', 'plan_vence', 'origen',
         'imagen_referencial', 'fotos', 'indexable',
+        'contacto_telefono', 'contacto_whatsapp', 'contacto_correo', 'contacto_web',
     ];
+
+    public const MAX_FOTOS = 10;
 
     protected $casts = [
         'fotos' => 'array',
@@ -43,6 +47,25 @@ class Aviso extends Model
     public function dueno(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function reclamos(): HasMany
+    {
+        return $this->hasMany(Reclamo::class);
+    }
+
+    /** Slug libre dentro de su localidad y categoría: cabanas-x, cabanas-x-2, … */
+    public static function slugLibre(string $titulo, int $localidadId, string $categoria, ?int $excepto = null): string
+    {
+        $base = \Illuminate\Support\Str::slug($titulo) ?: 'aviso';
+        $slug = $base;
+        $i = 2;
+        while (static::where('localidad_id', $localidadId)->where('categoria', $categoria)->where('slug', $slug)
+            ->when($excepto, fn ($q) => $q->where('id', '!=', $excepto))->exists()) {
+            $slug = $base.'-'.$i++;
+        }
+
+        return $slug;
     }
 
     public function privado(): HasOne

@@ -200,7 +200,8 @@ class ImportarSemilla extends Command
     {
         $subtipo = $f['subtipo'] ?: 'Servicio turístico';
         $lugar = $localidad === $f['comuna'] ? $f['comuna'] : "$localidad, {$f['comuna']}";
-        $txt = "$subtipo en $lugar, Región de {$f['region']}. Ubicación, cómo llegar y qué hacer cerca.";
+        $region = str_starts_with($f['region'], 'Metropolitana') ? 'Región '.$f['region'] : 'Región de '.$f['region'];
+        $txt = "$subtipo en $lugar, $region. Ubicación, cómo llegar y qué hacer cerca.";
 
         return Str::limit($txt, 155, '');
     }

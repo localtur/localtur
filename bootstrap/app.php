@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\NoIndexar::class);
         // Hostinger pasa por proxy: confiar en la cabecera de HTTPS
         $middleware->trustProxies(at: '*');
+        $middleware->redirectUsersTo('/cuenta');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

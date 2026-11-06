@@ -21,6 +21,11 @@ class ResolverPais
             abort_unless(in_array($codigo, Pais::codigos(), true), 404);
             Pais::fijar($codigo);
             $ruta->forgetParameter('pais');
+            if ($request->hasSession()) {
+                $request->session()->put('pais', $codigo); // las páginas de cuenta recuerdan el último país visitado
+            }
+        } elseif (Pais::multipais() && $request->hasSession() && in_array($request->session()->get('pais'), Pais::codigos(), true)) {
+            Pais::fijar($request->session()->get('pais'));
         }
 
         return $next($request);

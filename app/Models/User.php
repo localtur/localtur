@@ -52,6 +52,21 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /** Solo el equipo de alojarse/localtur entra al panel de administración. */
+    public function avisos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Aviso::class);
+    }
+
+    public function reclamos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Reclamo::class);
+    }
+
+    public function esEquipo(): bool
+    {
+        return in_array($this->rol, ['admin', 'moderador'], true);
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return in_array($this->rol, ['admin', 'moderador'], true);
