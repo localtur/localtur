@@ -52,6 +52,26 @@ class AvisoResource extends Resource
                     Forms\Components\Toggle::make('ubicacion_aproximada'),
                     Forms\Components\Toggle::make('indexable')->helperText('Solo cuando la ubicación ya está confirmada.'),
                 ]),
+            Forms\Components\Section::make('Fotos')
+                ->description('Hasta 10. La primera es la portada; arrastra para cambiar el orden. Sin fotos, el aviso muestra ilustraciones referenciales.')
+                ->schema([
+                    Forms\Components\FileUpload::make('fotos')
+                        ->hiddenLabel()
+                        ->image()
+                        ->multiple()
+                        ->maxFiles(10)
+                        ->maxSize(8192)
+                        ->reorderable()
+                        ->appendFiles()
+                        ->panelLayout('grid')
+                        ->disk('public')
+                        ->directory('avisos')
+                        ->visibility('public')
+                        ->imageResizeMode('contain')
+                        ->imageResizeTargetWidth('1600')
+                        ->imageResizeTargetHeight('1600')
+                        ->imageEditor(),
+                ]),
             Forms\Components\Section::make('Datos privados')
                 ->description('Nunca se muestran en el sitio. Solo para el equipo.')
                 ->relationship('privado')
