@@ -33,7 +33,7 @@ class ReclamoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($q) => $q->with(['aviso.localidad', 'aviso.privado', 'usuario']))
+            ->modifyQueryUsing(fn ($query) => $query->with(['aviso.localidad', 'aviso.privado', 'usuario']))
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')->label('Fecha')->since()->sortable(),
                 Tables\Columns\TextColumn::make('aviso.titulo')->label('Aviso')->searchable()->limit(35)
