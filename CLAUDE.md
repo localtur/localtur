@@ -16,6 +16,20 @@ Estado al 2026-11-06: pausado para trabajar en alojarse.cl. Respuestas al usuari
 - Correo: SMTP Hostinger `no.responder@localtur.com` (smtps 465). Prueba: `php artisan localtur:probar-correo correo@x`.
 - Ver en local sin composer: `git worktree add <dir> origin/deploy` (trae vendor/, sin dev deps) y copiar el código encima.
 
+## Decisión 2026-11-07 (reemplaza lo de abajo sobre Chile)
+- localtur.com será un **clon de la nueva versión de alojarse.cl** (la que se reconstruye en Base44 según el Canvas).
+- localtur.com **no incluye Chile** (evita confusión y avisos dobles): quitar `cl` y el reparto Metropolitana/resto.
+- Retomar localtur recién cuando la nueva alojarse.cl esté terminada.
+
+## Importador del registro de prestadores → alojarse.cl (2026-11-09)
+- `php artisan registro:importar` (App\Registro\*, config/registro.php). Programado 01:40 Chile en routes/console.php;
+  en Hostinger hace falta un cron cada minuto con `php artisan schedule:run` (usar la ruta completa de PHP 8.3 del alias).
+- Recorre todos los tipos menos aéreo (6) y ferroviario (8), lee fichas por partes (1.500/noche), fotos ≤10 en WebP
+  (descarta sin-foto, genéricas repetidas, íconos y duplicados por aHash) y envía a Base44 `importarRegistro` con
+  `x-cron-secret` = CRON_SECRET de Base44 (`ALOJARSE_CRON_SECRET` en .env). Opciones: --probar, --ficha=ID --simular, --tipo=.
+- Las fotos NO se atribuyen a SERNATUR: son del negocio, publicadas en su inscripción. Sin fotos → ilustraciones propias.
+- Tablas de control: registro_fichas, registro_fotos, registro_geocodigos (OSM Nominatim, 1/s), registro_listados.
+
 ## Marcas y países
 - `config/marca.php`: `localtur` (multipaís, hosts localtur.com y staging.localtur.com) y `alojarse` (`pais_fijo` cl,
   hosts alojarse.cl y prueba-alojarse.localtur.com — subdominio aún por crear). Alias `www.` redirigen 301.
