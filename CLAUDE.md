@@ -20,6 +20,8 @@ Estado al 2026-11-06: pausado para trabajar en alojarse.cl. Respuestas al usuari
 - localtur.com será un **clon de la nueva versión de alojarse.cl** (la que se reconstruye en Base44 según el Canvas).
 - localtur.com **no incluye Chile** (evita confusión y avisos dobles): quitar `cl` y el reparto Metropolitana/resto.
 - Retomar localtur recién cuando la nueva alojarse.cl esté terminada.
+- 2026-11-09: al terminar el Canvas en alojarse.cl se hace una copia completa para localtur.com y se adapta con la portada
+  propuesta: tarjetas por localidad con botones Alojar / Comer / Qué hacer / Comercio / Servicios (al usuario le pareció más funcional).
 
 ## Importador del registro de prestadores → alojarse.cl (2026-11-09)
 - `php artisan registro:importar` (App\Registro\*, config/registro.php). Programado 01:40 Chile en routes/console.php;
