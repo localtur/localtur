@@ -24,7 +24,7 @@ Estado al 2026-11-06: pausado para trabajar en alojarse.cl. Respuestas al usuari
   propuesta: tarjetas por localidad con botones Alojar / Comer / Qué hacer / Comercio / Servicios (al usuario le pareció más funcional).
 
 ## Importador del registro de prestadores → alojarse.cl (2026-11-09)
-- `php artisan registro:importar` (App\Registro\*, config/registro.php). Programado 01:40 Chile en routes/console.php;
+- `php artisan registro:importar` (App\Registro\*, config/registro.php). Programado en tandas cada 10 min de 01:00 a 06:50 Chile (routes/console.php, log storage/logs/registro.log);
   en Hostinger hace falta un cron cada minuto con `php artisan schedule:run` (usar la ruta completa de PHP 8.3 del alias).
 - Recorre todos los tipos menos aéreo (6) y ferroviario (8), lee fichas por partes (1.500/noche), fotos ≤10 en WebP
   (descarta sin-foto, genéricas repetidas, íconos y duplicados por aHash) y envía a Base44 `importarRegistro` con

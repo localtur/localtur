@@ -31,6 +31,7 @@ class ImportarRegistro extends Command
         {--tipo=* : Solo estos tipo_servicio del registro (ej. --tipo=1 --tipo=2)}
         {--fichas= : Máximo de fichas a leer en esta pasada}
         {--paginas= : Máximo de páginas del listado en esta pasada}
+        {--minutos= : Máximo de minutos de esta pasada}
         {--solo-listado : Solo recorrer el listado, sin leer fichas}
         {--ficha= : Leer solo esta ficha (número de inscripción) y mostrar lo que se enviaría}
         {--simular : No sube fotos ni envía nada a alojarse}
@@ -59,7 +60,7 @@ class ImportarRegistro extends Command
         if ($cfg['geocodificar']) {
             $this->geo = new Geocodificador($cfg['nominatim'], $cfg['agente']);
         }
-        $this->limite = microtime(true) + 60 * $cfg['minutos_max'];
+        $this->limite = microtime(true) + 60 * ((int) $this->option('minutos') ?: $cfg['minutos_max']);
 
         if ($this->option('probar')) {
             $r = $this->alojarse->estado();
@@ -83,6 +84,7 @@ class ImportarRegistro extends Command
             $this->leerFichas($tipos, (int) ($this->option('fichas') ?: $cfg['fichas_por_noche']));
         }
 
+        $this->line(now('America/Santiago')->format('Y-m-d H:i') . ' · fin de la pasada');
         $this->table(array_keys($this->cuenta), [array_values($this->cuenta)]);
         $this->resumenEstados();
 

@@ -21,6 +21,13 @@ return [
     'fichas_por_noche' => (int) env('REGISTRO_FICHAS_POR_NOCHE', 1500),
     'paginas_por_noche' => (int) env('REGISTRO_PAGINAS_POR_NOCHE', 400),
     'minutos_max' => (int) env('REGISTRO_MINUTOS_MAX', 240),
+    // Tandas programadas: Hostinger corta procesos largos, así que de noche corren tandas cortas
+    // cada 10 minutos (01:00–06:50, 36 tandas). Cada una lista pocas páginas y lee pocas fichas.
+    'tanda' => [
+        'paginas' => (int) env('REGISTRO_TANDA_PAGINAS', 12),
+        'fichas' => (int) env('REGISTRO_TANDA_FICHAS', 40),
+        'minutos' => (int) env('REGISTRO_TANDA_MINUTOS', 8),
+    ],
     'relistar_dias' => 7,     // cada cuánto se recorre de nuevo el listado de un tipo
     'revisar_dias' => 30,     // cada cuánto se vuelve a leer una ficha ya enviada
 
