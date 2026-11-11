@@ -93,7 +93,7 @@ class RegistroImportarTest extends TestCase
 
     public function test_importa_y_envia_a_alojarse(): void
     {
-        config(['registro.pausa_ms' => 0, 'registro.geocodificar' => false, 'registro.alojarse.secreto' => 'sek', 'registro.tipos' => ['1' => 'Alojamiento']]);
+        config(['registro.pausa_ms' => 0, 'registro.geocodificar' => false, 'registro.alojarse.secreto' => 'sek', 'registro.tipos' => ['1' => 'Alojamiento'], 'registro.fotos.subir' => true]);
         $perfil = $this->foto(1600, 1200, 11);
         $enviados = [];
         $subidas = 0;
@@ -156,6 +156,40 @@ class RegistroImportarTest extends TestCase
         $this->artisan('registro:importar')->assertSuccessful();
         $this->assertSame([], $enviados);
         $this->assertSame(2, $subidas);
+    }
+
+    public function test_sin_subir_fotos_envia_sin_fotos_y_luego_reencola(): void
+    {
+        config(['registro.pausa_ms' => 0, 'registro.geocodificar' => false, 'registro.alojarse.secreto' => 'sek', 'registro.tipos' => ['1' => 'Alojamiento'], 'registro.fotos.subir' => false]);
+        $enviados = [];
+        Http::fake(function (Request $r) use (&$enviados) {
+            $u = $r->url();
+            if (str_contains($u, 'alojarse.cl')) {
+                $this->assertNotSame('subir_foto', $r['accion'], 'no debe subir fotos');
+                $enviados = array_merge($enviados, $r['items']);
+
+                return Http::response(['resultados' => array_map(fn ($i) => ['id' => $i['id'], 'estado' => 'creado', 'aviso_id' => 'c' . $i['id'], 'entidad' => 'Cabin'], $r['items'])]);
+            }
+            if (str_contains($u, 'resultado.php')) {
+                return Http::response(str_contains($u, 'page=1') ? $this->html('listado.html') : '<html>0 Servicios</html>');
+            }
+            if (str_contains($u, '/fotos/')) {
+                $this->fail('no debe descargar fotos');
+            }
+            if (str_contains($u, '25890')) {
+                return Http::response('no', 404);
+            }
+
+            return Http::response($this->html('ficha.html'));
+        });
+
+        $this->artisan('registro:importar')->assertSuccessful();
+        $this->assertCount(1, $enviados);
+        $this->assertSame([], $enviados[0]['fotos']);
+        $this->assertFalse($enviados[0]['fotos_completas'], 'incompletas: alojarse no borra fotos que ya tenga');
+
+        $this->artisan('registro:importar', ['--reencolar-fotos' => true])->assertSuccessful();
+        $this->assertSame('pendiente', DB::table('registro_fichas')->where('registro_id', '31002')->value('estado'));
     }
 
     public function test_sin_secreto_no_envia(): void

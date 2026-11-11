@@ -32,6 +32,10 @@ return [
     'revisar_dias' => 30,     // cada cuánto se vuelve a leer una ficha ya enviada
 
     'fotos' => [
+        // Cada foto subida gasta créditos de integración de Base44. Apagado por defecto (nov. 2026: quedaban
+        // pocos créditos del mes). Con false los avisos se envían sin fotos (no se borran las que ya tienen)
+        // y después se vuelven a poner en cola con: php artisan registro:importar --reencolar-fotos
+        'subir' => (bool) env('REGISTRO_SUBIR_FOTOS', false),
         'max' => 10,
         'lado_max' => 1280,
         'lado_min' => 240,        // más chica que esto no sirve (íconos, logos)

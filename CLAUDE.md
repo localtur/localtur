@@ -29,6 +29,8 @@ Estado al 2026-11-06: pausado para trabajar en alojarse.cl. Respuestas al usuari
 - Recorre todos los tipos menos aéreo (6) y ferroviario (8), lee fichas por partes (1.500/noche), fotos ≤10 en WebP
   (descarta sin-foto, genéricas repetidas, íconos y duplicados por aHash) y envía a Base44 `importarRegistro` con
   `x-cron-secret` = CRON_SECRET de Base44 (`ALOJARSE_CRON_SECRET` en .env). Opciones: --probar, --ficha=ID --simular, --tipo=.
+- Subida de fotos APAGADA por defecto (créditos de integración Base44): `REGISTRO_SUBIR_FOTOS=true` en .env la activa;
+  luego `php artisan registro:importar --reencolar-fotos` vuelve a poner en cola los avisos enviados sin fotos.
 - Las fotos NO se atribuyen a SERNATUR: son del negocio, publicadas en su inscripción. Sin fotos → ilustraciones propias.
 - Tablas de control: registro_fichas, registro_fotos, registro_geocodigos (OSM Nominatim, 1/s), registro_listados.
 

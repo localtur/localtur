@@ -35,7 +35,8 @@ class ImportarRegistro extends Command
         {--solo-listado : Solo recorrer el listado, sin leer fichas}
         {--ficha= : Leer solo esta ficha (número de inscripción) y mostrar lo que se enviaría}
         {--simular : No sube fotos ni envía nada a alojarse}
-        {--probar : Probar la conexión con alojarse y terminar}';
+        {--probar : Probar la conexión con alojarse y terminar}
+        {--reencolar-fotos : Vuelve a poner en cola los avisos enviados sin fotos (cuando se activa REGISTRO_SUBIR_FOTOS)}';
 
     protected $description = 'Importa el registro de prestadores turísticos a alojarse.cl (con fotos optimizadas)';
 
@@ -65,6 +66,14 @@ class ImportarRegistro extends Command
         if ($this->option('probar')) {
             $r = $this->alojarse->estado();
             $this->info('Conexión con alojarse: ' . json_encode($r, JSON_UNESCAPED_UNICODE));
+
+            return self::SUCCESS;
+        }
+
+        if ($this->option('reencolar-fotos')) {
+            $n = DB::table('registro_fichas')->whereIn('estado', ['creado', 'actualizado'])->where('fotos', 0)
+                ->update(['estado' => 'pendiente', 'huella' => null, 'updated_at' => now()]);
+            $this->info("$n avisos sin fotos quedaron en cola para leerlos de nuevo.");
 
             return self::SUCCESS;
         }
@@ -224,6 +233,9 @@ class ImportarRegistro extends Command
     private function fotos(string $fichaId, string $nombre, array $fuentes): array
     {
         $cfg = config('registro.fotos');
+        if (! $cfg['subir'] && ! $this->option('simular')) {
+            return [[], false]; // sin fotos por ahora; "incompletas" para que alojarse no borre las que ya hay
+        }
         $urls = [];
         $huellas = [];
         $completas = true;
