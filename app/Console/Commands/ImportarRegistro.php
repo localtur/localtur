@@ -36,6 +36,7 @@ class ImportarRegistro extends Command
         {--ficha= : Leer solo esta ficha (número de inscripción) y mostrar lo que se enviaría}
         {--simular : No sube fotos ni envía nada a alojarse}
         {--probar : Probar la conexión con alojarse y terminar}
+        {--reencolar-limite : Vuelve a poner en cola las fichas que fallaron solo por el límite de peticiones de Base44}
         {--reencolar-fotos : Vuelve a poner en cola los avisos enviados sin fotos (cuando se activa REGISTRO_SUBIR_FOTOS)}';
 
     protected $description = 'Importa el registro de prestadores turísticos a alojarse.cl (con fotos optimizadas)';
@@ -50,7 +51,7 @@ class ImportarRegistro extends Command
 
     private float $limite;
 
-    private array $cuenta = ['paginas' => 0, 'nuevas' => 0, 'leidas' => 0, 'enviadas' => 0, 'sin_cambios' => 0, 'fotos_subidas' => 0, 'fotos_descartadas' => 0, 'errores' => 0];
+    private array $cuenta = ['paginas' => 0, 'nuevas' => 0, 'leidas' => 0, 'enviadas' => 0, 'sin_cambios' => 0, 'fotos_subidas' => 0, 'fotos_descartadas' => 0, 'errores' => 0, 'limite' => 0];
 
     public function handle(): int
     {
@@ -66,6 +67,15 @@ class ImportarRegistro extends Command
         if ($this->option('probar')) {
             $r = $this->alojarse->estado();
             $this->info('Conexión con alojarse: ' . json_encode($r, JSON_UNESCAPED_UNICODE));
+
+            return self::SUCCESS;
+        }
+
+        if ($this->option('reencolar-limite')) {
+            $n = DB::table('registro_fichas')->where('estado', 'error')
+                ->where(fn ($q) => $q->where('error', 'like', '%rate limit%')->orWhere('error', 'like', '%traffic volume limit%')->orWhere('error', 'like', '%too many requests%'))
+                ->update(['estado' => 'pendiente', 'intentos' => 0, 'error' => null, 'updated_at' => now()]);
+            $this->info("$n fichas que fallaron por el límite de Base44 quedaron en cola de nuevo.");
 
             return self::SUCCESS;
         }
@@ -183,6 +193,7 @@ class ImportarRegistro extends Command
             if (count($lote) >= $cfg['alojarse']['lote']) {
                 $fallosSeguidos = $this->enviar($lote) ? 0 : $fallosSeguidos + 1;
                 $lote = [];
+                $this->dormir((int) $cfg['alojarse']['pausa_lote_s']);
                 if ($fallosSeguidos >= 3) {
                     $this->error('alojarse no responde; se detiene y sigue mañana.');
 
@@ -316,6 +327,13 @@ class ImportarRegistro extends Command
         try {
             $r = $this->alojarse->avisos(array_column($lote, 'item'));
         } catch (Throwable $e) {
+            if (($espera = $this->esperaPorLimite($e->getMessage())) !== null) {
+                $this->cuenta['limite'] += count($lote);
+                $this->warn('Base44 pidió esperar; el lote queda en cola. ' . $e->getMessage());
+                $this->dormir($espera);
+
+                return false;
+            }
             foreach (array_keys($lote) as $id) {
                 $this->marcarError((string) $id, $e->getMessage());
             }
@@ -323,12 +341,20 @@ class ImportarRegistro extends Command
 
             return false;
         }
+        $espera = null;
         foreach ($r['resultados'] ?? [] as $res) {
             $id = (string) ($res['id'] ?? '');
             if (! isset($lote[$id])) {
                 continue;
             }
             if (($res['estado'] ?? '') === 'error') {
+                // Límite de peticiones de Base44: no es culpa de la ficha. No se anota error ni se suma intento: sigue en cola.
+                if (($e = $this->esperaPorLimite((string) ($res['error'] ?? ''))) !== null) {
+                    $espera = max($espera ?? 0, $e);
+                    $this->cuenta['limite']++;
+
+                    continue;
+                }
                 $this->marcarError($id, $res['error'] ?? 'error en alojarse');
 
                 continue;
@@ -340,8 +366,33 @@ class ImportarRegistro extends Command
             ]);
             $this->cuenta['enviadas']++;
         }
+        if ($espera !== null) {
+            $this->warn("Base44 pidió esperar {$espera}s; las fichas afectadas siguen en cola.");
+            $this->dormir($espera);
+
+            return false;
+        }
 
         return true;
+    }
+
+    /** Si el mensaje es el límite de peticiones de Base44, los segundos a esperar ("Retry after 47s" + margen, con tope); si no, null. */
+    private function esperaPorLimite(string $mensaje): ?int
+    {
+        if (! preg_match('/rate limit|too many requests|traffic volume limit/i', $mensaje)) {
+            return null;
+        }
+        $s = preg_match('/retry after (\d+)\s*s/i', $mensaje, $m) ? (int) $m[1] + 3 : 60;
+
+        return min($s, (int) config('registro.alojarse.espera_max_s', 70));
+    }
+
+    /** Pausa sin pasarse del tiempo de la pasada. */
+    private function dormir(int $segundos): void
+    {
+        if ($segundos > 0 && ! $this->option('simular')) {
+            sleep(min($segundos, max(0, (int) ($this->limite - microtime(true)))));
+        }
     }
 
     private function unaFicha(string $id): int
