@@ -51,6 +51,8 @@ return [
     'alojarse' => [
         'url' => env('ALOJARSE_IMPORTAR_URL', 'https://alojarse.cl/functions/importarRegistro'),
         'secreto' => env('ALOJARSE_CRON_SECRET'),
-        'lote' => 25,
+        'lote' => (int) env('REGISTRO_LOTE', 8),                 // alojarse.cl (Base44) limita las lecturas: lotes chicos y espaciados
+        'pausa_lote_s' => (int) env('REGISTRO_PAUSA_LOTE_S', 20), // entre un lote y el siguiente
+        'espera_max_s' => 70,                                     // tope de espera cuando Base44 pide "Retry after"
     ],
 ];
