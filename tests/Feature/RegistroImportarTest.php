@@ -192,6 +192,51 @@ class RegistroImportarTest extends TestCase
         $this->assertSame('pendiente', DB::table('registro_fichas')->where('registro_id', '31002')->value('estado'));
     }
 
+    public function test_limite_de_base44_no_marca_error_ni_suma_intentos(): void
+    {
+        config(['registro.pausa_ms' => 0, 'registro.geocodificar' => false, 'registro.alojarse.secreto' => 'sek', 'registro.tipos' => ['1' => 'Alojamiento'],
+            'registro.fotos.subir' => false, 'registro.alojarse.espera_max_s' => 0, 'registro.alojarse.pausa_lote_s' => 0]);
+        $limite = 'Rate limit exceeded: entity_list allows 140 requests per 60s for each caller of this app. Retry after 47s.';
+        $llamadas = 0;
+        Http::fake(function (Request $r) use ($limite, &$llamadas) {
+            $u = $r->url();
+            if (str_contains($u, 'alojarse.cl')) {
+                $llamadas++;
+
+                return Http::response(['resultados' => array_map(fn ($i) => ['id' => $i['id'], 'estado' => 'error', 'error' => $limite], $r['items'])]);
+            }
+            if (str_contains($u, 'resultado.php')) {
+                return Http::response(str_contains($u, 'page=1') ? $this->html('listado.html') : '<html>0 Servicios</html>');
+            }
+            if (str_contains($u, '25890')) {
+                return Http::response('no', 404);
+            }
+
+            return Http::response($this->html('ficha.html'));
+        });
+
+        $this->artisan('registro:importar')->assertSuccessful();
+        $this->assertSame(1, $llamadas);
+        $f = DB::table('registro_fichas')->where('registro_id', '31002')->first();
+        $this->assertSame('pendiente', $f->estado, 'sigue en cola');
+        $this->assertSame(0, (int) $f->intentos, 'el límite no cuenta como intento');
+        $this->assertNull($f->error);
+    }
+
+    public function test_reencolar_fichas_que_fallaron_por_el_limite(): void
+    {
+        $fila = fn (string $id, string $error, int $intentos) => ['registro_id' => $id, 'tipo' => '1', 'url' => "https://x.cl/$id-a", 'estado' => 'error', 'error' => $error, 'intentos' => $intentos, 'created_at' => now(), 'updated_at' => now()];
+        DB::table('registro_fichas')->insert([
+            $fila('1', 'Rate limit exceeded: entity_list allows 140 requests per 60s. Retry after 47s.', 5),
+            $fila('2', 'La ficha respondió 500', 2),
+        ]);
+        $this->artisan('registro:importar', ['--reencolar-limite' => true])->assertSuccessful();
+        $a = DB::table('registro_fichas')->where('registro_id', '1')->first();
+        $this->assertSame(['pendiente', 0, null], [$a->estado, (int) $a->intentos, $a->error]);
+        $b = DB::table('registro_fichas')->where('registro_id', '2')->first();
+        $this->assertSame(['error', 2], [$b->estado, (int) $b->intentos], 'los otros errores no se tocan');
+    }
+
     public function test_sin_secreto_no_envia(): void
     {
         config(['registro.alojarse.secreto' => null]);
